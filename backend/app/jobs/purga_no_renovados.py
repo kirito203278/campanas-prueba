@@ -7,16 +7,16 @@ queda huérfana, también se borra.
 import datetime as dt
 import logging
 
+from app.config import get_settings
 from app.database import SessionLocal
 from app.models import ArchivoNoRenovado, Cliente, CuentaPublicitaria
 
 logger = logging.getLogger("jobs.purga_no_renovados")
 
-LIMITE_PURGA_DIAS = 365
-
 
 def purgar_no_renovados() -> None:
     db = SessionLocal()
+    limite_dias = get_settings().purga_no_renovados_dias
     try:
         hoy = dt.date.today()
         clientes = db.query(Cliente).filter_by(estado="no_renovado").all()
@@ -29,7 +29,7 @@ def purgar_no_renovados() -> None:
                 .order_by(ArchivoNoRenovado.archivado_en.desc())
                 .first()
             )
-            if ultimo is None or (hoy - ultimo.archivado_en.date()).days < LIMITE_PURGA_DIAS:
+            if ultimo is None or (hoy - ultimo.archivado_en.date()).days < limite_dias:
                 continue
 
             cuenta_id = cliente.cuenta_id

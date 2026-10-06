@@ -35,3 +35,9 @@ def bloqueado(username: str) -> bool:
         vigentes = _vigentes(_intentos.get(username, []), ahora)
         _intentos[username] = vigentes
         return len(vigentes) >= LIMITE_INTENTOS
+
+
+def reiniciar_todo() -> None:
+    """Limpia todos los contadores (usado por las pruebas)."""
+    with _lock:
+        _intentos.clear()

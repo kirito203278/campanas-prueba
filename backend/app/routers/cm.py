@@ -12,6 +12,7 @@ import io
 import re
 
 from app.bitacora import registrar
+from app.config import get_settings
 from app.consolidacion import mensuales_consolidados_de_cliente, semanas_consolidadas_de_cliente
 from app.database import get_db
 from app.dates import week_range_for
@@ -66,9 +67,6 @@ def _get_campana_or_404(db: Session, cm_id: int, campana_id: int) -> Campana:
     return campana
 
 
-LIMITE_CONTINUAR_DIAS = 60  # bajo este plazo desde que se archivó, se puede "continuar" con la última campaña
-
-
 def _ultimo_archivo_no_renovado(db: Session, cliente_id: int) -> ArchivoNoRenovado | None:
     return (
         db.query(ArchivoNoRenovado)
@@ -82,7 +80,8 @@ def _puede_continuar(db: Session, cliente_id: int) -> bool:
     ultimo = _ultimo_archivo_no_renovado(db, cliente_id)
     if ultimo is None:
         return False
-    return (dt.date.today() - ultimo.archivado_en.date()).days < LIMITE_CONTINUAR_DIAS
+    limite = get_settings().continuar_no_renovado_dias
+    return (dt.date.today() - ultimo.archivado_en.date()).days < limite
 
 
 def _ensure_semana_actual(db: Session, campana: Campana) -> None:
