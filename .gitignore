@@ -1,0 +1,12 @@
+.env
+backend/seed_credentials.txt
+backend/credenciales_entrega.pdf
+backend/credenciales_entrega.txt
+__pycache__/
+*.pyc
+.venv/
+node_modules/
+frontend/dist/
+backend/app/static/
+*.log
+.claude/settings.local.json

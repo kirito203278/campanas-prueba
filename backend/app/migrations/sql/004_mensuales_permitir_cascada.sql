@@ -1,0 +1,11 @@
+-- ============================================================================
+-- Ajuste: la sección 9-c de la especificación exige que, cuando un cliente
+-- "no renueva y se borra", el borrado sea en cascada hasta mensuales
+-- ("clientes → campañas → semanas → mensuales"). El trigger original
+-- bloqueaba TODO delete sobre mensuales, incluido el disparado por esa
+-- cascada legítima. La garantía real de inmutabilidad es que nadie pueda
+-- EDITAR el histórico (trg_mensuales_no_update, que se conserva); el
+-- borrado solo ocurre como consecuencia de borrar el cliente completo, y no
+-- existe ningún endpoint que borre un mensual suelto.
+-- ============================================================================
+DROP TRIGGER IF EXISTS trg_mensuales_no_delete ON mensuales;

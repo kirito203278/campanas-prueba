@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: demo
+      POSTGRES_PASSWORD: demo
+      POSTGRES_DB: campanas
+      TZ: America/Mexico_City
+    volumes:
+      - demo_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U demo -d campanas"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+psycopg2://demo:demo@db:5432/campanas
+      JWT_SECRET: demo-solo-para-pruebas-locales-no-usar-en-produccion-0123456789
+      HUELLA_SECRET: demo-huella-solo-pruebas-locales-0123456789abcdef
+      JOBS_SECRET: demo-jobs-solo-pruebas-locales-0123
+      AES_KEY_B64: ZGVtby1hZXMta2V5LWZvci1sb2NhbC10ZXN0cy1vbmw=
+      CORS_ORIGINS: http://localhost:8001
+      SEED_DEMO: "true"
+      TZ: America/Mexico_City
+      PORT: "8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${APP_PORT:-8001}:8000"
+
+volumes:
+  demo_db:
